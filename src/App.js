@@ -9,7 +9,7 @@ import HomePage from './pages/HomePage';
 function App() {
   return (
     <Switch>
-      <Route path="/" component={HomePage} />
+      <Route exact path="/" component={HomePage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/forgot" component={ForgotPasswordPage} />

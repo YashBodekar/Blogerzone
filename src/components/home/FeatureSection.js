@@ -3,7 +3,6 @@ import Card from '../common/card/Card'
 
 const FeatureSection = () => {
   return (
-    <div style={{ zIndex: '2' }}>
       <div className='d-flex flex-column align-items-center justify-content-center py-5'
         style={{ width: '100vw', backgroundColor: '#EFEFEF' }}
       >
@@ -24,7 +23,6 @@ const FeatureSection = () => {
           <Card /> */}
         </div>
       </div>
-    </div>
   )
 }
 
