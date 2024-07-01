@@ -19,8 +19,8 @@ const FeatureSection = () => {
         </h2>
         <div className="d-flex flex column align-items-center justify-content-center py-5">
           <Card />
-          {/* <Card />
-          <Card /> */}
+          <Card />
+          <Card />
         </div>
       </div>
   )
