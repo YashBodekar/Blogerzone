@@ -8,6 +8,11 @@ import HomePage from './pages/HomePage';
 import './App.css';
 import BlogPage from './pages/BlogPage';
 import BlogDetail from './components/blog/BlogDetail';
+import UserProfilePage from './pages/UserProfilePage';
+import ApprovalPage from './pages/ApprovalPage';
+import BlogApproval from './components/admin/BlogApproval';
+import QuoteApproval from './components/admin/QuoteApproval';
+import QuotePage from './pages/QuotePage';
 
 function App() {
   return (
@@ -17,7 +22,12 @@ function App() {
       <Route path="/register" component={RegisterPage} />
       <Route path="/forgot" component={ForgotPasswordPage} />
       <Route path="/blogs" component={BlogPage} />
+      <Route path="/quotes" component={QuotePage} />
       <Route path="/blogd" component={BlogDetail} />
+      <Route path="/profile" component={UserProfilePage} />
+      <Route path="/approval" component={ApprovalPage} />
+      <Route path="/blog/approval" component={BlogApproval} />
+      <Route path="/quote/approval" component={QuoteApproval} />
     </Switch>
   );
 }
