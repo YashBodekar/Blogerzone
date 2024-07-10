@@ -13,8 +13,11 @@ import ApprovalPage from './pages/ApprovalPage';
 import BlogApproval from './components/admin/BlogApproval';
 import QuoteApproval from './components/admin/QuoteApproval';
 import QuotePage from './pages/QuotePage';
+import ProtectedRoute from './utils/ProtectedRoute';
+import { useAuth } from './context/AuthContext';
 
 function App() {
+  const { currentUser } = useAuth()
   return (
     <Switch>
       <Route exact path="/" component={HomePage} />
@@ -24,10 +27,10 @@ function App() {
       <Route path="/blogs" component={BlogPage} />
       <Route path="/quotes" component={QuotePage} />
       <Route path="/blogd" component={BlogDetail} />
-      <Route path="/profile" component={UserProfilePage} />
       <Route path="/approval" component={ApprovalPage} />
       <Route path="/blog/approval" component={BlogApproval} />
       <Route path="/quote/approval" component={QuoteApproval} />
+      <ProtectedRoute path="/profile" component={UserProfilePage} auth={currentUser ? true : false} />
     </Switch>
   );
 }
