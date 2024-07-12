@@ -27,10 +27,10 @@ function App() {
       <Route path="/blogs" component={BlogPage} />
       <Route path="/quotes" component={QuotePage} />
       <Route path="/blogd" component={BlogDetail} />
-      <Route path="/approval" component={ApprovalPage} />
-      <Route path="/blog/approval" component={BlogApproval} />
-      <Route path="/quote/approval" component={QuoteApproval} />
+      <Route path="/approval/blog/:id" component={BlogApproval}  />
+      <Route path="/approval/quote/:id" component={QuoteApproval} />
       <ProtectedRoute path="/profile" component={UserProfilePage} auth={currentUser ? true : false} />
+      <ProtectedRoute path="/approval" component={ApprovalPage} auth={currentUser ? true : false} />
     </Switch>
   );
 }

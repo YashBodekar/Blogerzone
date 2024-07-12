@@ -16,6 +16,7 @@ const ProfileSection = () => {
     const [showBlogForm, setShowBlogForm] = React.useState(false);
     const [showQuoteForm, setShowQuoteForm] = React.useState(false);
     const [userBlogs, setUserBlogs] = useState([]);
+    const [userQuotes, setUserQuotes] = useState([]);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [progressShow, setProgressShow] = useState(false);
@@ -26,6 +27,7 @@ const ProfileSection = () => {
     const blogSocial = useRef();
     const [blogContent, setBlogContent] = useState('');
     const [blogImage, setBlogImage] = React.useState();
+    const [quoteContent, setQuoteContent] = useState('');
 
     useEffect(() => {
         if (currentUser && currentUser.userId) {
@@ -42,6 +44,25 @@ const ProfileSection = () => {
                         }
                     });
                     setUserBlogs(blogData);
+                });
+        }
+    }, [currentUser]);
+
+    useEffect(() => {
+        if (currentUser && currentUser.userId) {
+            db.collection('quotes').get()
+                .then((snapshot) => {
+                    const quoteData = [];
+                    snapshot.forEach((doc) => {
+                        if (doc.data().userId === currentUser.userId) {
+                            const data = {
+                                id: doc.id,
+                                ...doc.data()
+                            };
+                            quoteData.push(data);
+                        }
+                    });
+                    setUserQuotes(quoteData);
                 });
         }
     }, [currentUser]);
@@ -113,6 +134,46 @@ const ProfileSection = () => {
         }
     }
 
+    const addQuote = async (e) => {
+        e.preventDefault();
+        setProgressShow(true);
+        setDone(55);
+        try {
+            await db.collection('quotes').add({
+                authorName: currentUser.username,
+                isFeatured: false,
+                isApproved: false,
+                description: quoteContent,
+                updatedOn: new Date().toString(),
+                userId: currentUser.userId
+            });
+            setDone(100);
+            setSuccess(true);
+            setError(false);
+            setTimeout(() => {
+                setSuccess(false);
+                setProgressShow(false);
+                setDone(0);
+            }, 3000);
+
+        } catch (error) {
+            setError(true);
+            setSuccess(false);
+            setTimeout(() => {
+                setError(false);
+            }, 3000);
+        }
+
+    }
+
+    const removeBlog = (id) => {
+        setUserBlogs(userBlogs.filter((blog) => blog.id !== id));
+    };
+
+    const removeQuote = (id) => {
+        setUserQuotes(userQuotes.filter((quote) => quote.id !== id));
+    }
+
     return (
         <div className='container'>
             <div>
@@ -122,17 +183,17 @@ const ProfileSection = () => {
                             <div className="text-center text-dark" style={{ width: "800px" }}>
                                 <div>
                                     {' '}
-                                    <Avatar name={"John Doe"} round="50px" />
+                                    <Avatar name={currentUser && currentUser.username} round="50px" />
                                 </div>
                             </div>
                             <div className="mt-5 text-center">
                                 <h4 className='mb-0 text-dark'
                                     style={{ fontSize: '32px', fontFamily: 'Dancing Script' }}
                                 >
-                                    John Doe
+                                    {currentUser && currentUser.username}
                                 </h4> {' '}
                                 <span className="text-muted d-block mb-2" style={{ fontSize: '22px' }}>
-                                    john@gmail.com
+                                    {currentUser && currentUser.email}
                                 </span> {' '}
                                 <br />
                                 <div className="container d-flex justify-content-center mt-4 px-4">
@@ -155,7 +216,7 @@ const ProfileSection = () => {
                                                     color='green'
                                                 />
                                             </div>{' '}
-                                            <span className="fs-5">2</span>
+                                            <span className="fs-5">{userBlogs.length}</span>
                                         </h6>
                                     </div>
                                     <div className='ml-4'>
@@ -177,7 +238,7 @@ const ProfileSection = () => {
                                                     color='green'
                                                 />
                                             </div>{' '}
-                                            <span className="fs-5">0</span>
+                                            <span className="fs-5"> {userQuotes.length} </span>
                                         </h6>
                                     </div>
                                 </div>
@@ -189,9 +250,13 @@ const ProfileSection = () => {
                     <br />
 
                     <div className="container d-flex flex-column justify-content-center">
-                        <button className="btn btn-primary ms-3 mt-2">
-                            Approvals
-                        </button>
+                        {currentUser.isAdmin && (
+                            <button className="btn btn-primary ms-3 mt-2"
+                            onClick={() => history.push("/approval")}
+                            >
+                                Approvals
+                            </button>
+                        )}
                     </div>
                 </div>
                 {showBlogForm && (
@@ -297,22 +362,28 @@ const ProfileSection = () => {
                 )}
 
                 {showQuoteForm && (
-                    <form>
-                        <div className="alert alert-success" role='alert'>
-                            Success! Your quote is added and will be posted once approved by Admin
-                        </div>
-                        <div className="alert alert-danger" role='alert'>
-                            Something went wrong !
-                        </div>
+                    <form onSubmit={addQuote}>
+                        {success && (
+                            <div className="alert alert-success" role='alert'>
+                                Success! Your quote is added and will be posted once approved by Admin
+                            </div>
+                        )}
+                        {error && (
+                            <div className="alert alert-danger" role='alert'>
+                                Something went wrong !
+                            </div>
+                        )}
 
-                        <div className="d-flex">
-                            <Line
-                                percent={'50'}
-                                strokeWidth={2}
-                                strokeColor="green"
-                            />
-                            <span>50%</span>
-                        </div>
+                        {progressShow && (
+                            <div className="d-flex">
+                                <Line
+                                    percent={done}
+                                    strokeWidth={2}
+                                    strokeColor="green"
+                                />
+                                <span>{done}%</span>
+                            </div>
+                        )}
 
                         <div className="form-group">
                             <br />
@@ -320,6 +391,8 @@ const ProfileSection = () => {
                                 type="text"
                                 placeholder='Description'
                                 style={{ height: '200px' }}
+                                value={quoteContent}
+                                onChange={(value) => setQuoteContent(value)}
                             />
                         </div>
 
@@ -336,12 +409,25 @@ const ProfileSection = () => {
                 <div className="container d-flex justify-content-center p-4">
                     <h2 style={{ fontFamily: 'Dancing Script' }}>My Blogs</h2>
                 </div>
-                {JSON.stringify(userBlogs)}
 
                 <div className="container d-flex flex-direction-row flex-wrap justify-content-center my-3">
-                    <Card />
-                    <Card />
-                    <Card />
+                    {userBlogs.length > 0 ? (
+                        userBlogs && userBlogs.map((data) => (
+                            <Card
+                                image={data.images[0]}
+                                content={data.description}
+                                title={data.title}
+                                author={data.authorName}
+                                date={data.updatedOn}
+                                url={`/blog/${data.id}`}
+                                id={data.id}
+                                collection={'blogs'}
+                                isApproved={data.isApproved}
+                                deleteOption={true}
+                                removeData={(data) => removeBlog(data.id)}
+                            />
+                        ))
+                    ) : (<div className="d-flex justify-content-center">No Blogs Yet</div>)}
                 </div>
 
             </div>
@@ -352,9 +438,21 @@ const ProfileSection = () => {
                 </div>
 
                 <div className="container d-flex flex-direction-row flex-wrap justify-content-center my-3">
-                    <Card />
-                    <Card />
-                    <Card />
+                    {userQuotes.length > 0 ? (
+                        userQuotes && userQuotes.map((data) => (
+                            <Card
+                                content={data.description}
+                                author={data.authorName}
+                                date={data.updatedOn}
+                                url={`/quote/${data.id}`}
+                                id={data.id}
+                                collection={'quotes'}
+                                isApproved={data.isApproved}
+                                deleteOption={true}
+                                removeData={(data) => removeQuote(data.id)}
+                            />
+                        ))
+                    ) : (<div className="d-flex justify-content-center">No Quotes Yet</div>)}
                 </div>
             </div>
         </div>
