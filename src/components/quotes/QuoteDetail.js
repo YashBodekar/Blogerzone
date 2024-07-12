@@ -1,24 +1,24 @@
 import React, { useEffect, useState } from 'react'
 import NavBar from '../common/NavBar'
 import { HandThumbsDownFill, HandThumbsUpFill } from 'react-bootstrap-icons'
-import Comment from './comments/Comment'
+import Comment from '../blog/comments/Comment'
 import { WhatsappShareButton, WhatsappIcon, FacebookShareButton, FacebookIcon, TwitterShareButton, TwitterIcon, TelegramShareButton, TelegramIcon } from 'react-share'
-import './Blog.css'
+import '../blog/Blog.css'
 import { useHistory, useParams } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
 import { db } from '../../firebase'
 import { Link } from 'react-router-dom'
 
-const BlogDetail = () => {
+const QuoteDetail = () => {
 
     const { id } = useParams();
 
-    const [blog, setBlog] = useState();
+    const [quote, setQuote] = useState();
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState(false);
     const [comment, setComment] = useState('');
     const [comments, setComments] = useState([]);
-    const [authorBlogs, setAuthorBlogs] = useState([]);
+    const [authorQuotes, setAuthorQuotes] = useState([]);
     const [authorId, setAuthorID] = useState();
     const [likes, setLikes] = useState([]);
 
@@ -27,13 +27,13 @@ const BlogDetail = () => {
     const { currentUser } = useAuth();
 
     useEffect(() => {
-        const single = db.collection('blogs').doc(id);
+        const single = db.collection('quotes').doc(id);
 
         single.get()
             .then(function (doc) {
                 if (doc.exists) {
                     let data = doc.data();
-                    setBlog(data);
+                    setQuote(data);
                     setAuthorID(data.userId)
                 }
             })
@@ -44,7 +44,7 @@ const BlogDetail = () => {
     }, [id]);
 
     useEffect(() => {
-        db.collection('blogs').doc(id).collection('comments')
+        db.collection('quotes').doc(id).collection('comments')
             .get()
             .then((snapshot) => {
                 let commentData = [];
@@ -59,7 +59,7 @@ const BlogDetail = () => {
     }, [id]);
 
     useEffect(() => {
-        db.collection('blogs').doc(id).collection('likes')
+        db.collection('quotes').doc(id).collection('likes')
             .get()
             .then((snapshot) => {
                 let likeData = [];
@@ -74,20 +74,20 @@ const BlogDetail = () => {
     }, [id]);
 
     useEffect(() => {
-        db.collection('blogs')
+        db.collection('quotes')
             .get()
             .then((snapshot) => {
-                const blogData = [];
+                const quoteData = [];
                 snapshot.forEach((doc) => {
                     if (doc.data().isApproved === true && doc.data().userId === authorId) {
                         const data = {
                             id: doc.id,
                             ...doc.data()
                         };
-                        blogData.push(data);
+                        quoteData.push(data);
                     }
                 });
-                setAuthorBlogs(blogData)
+                setAuthorQuotes(quoteData)
             });
 
     }, [authorId]);
@@ -109,7 +109,7 @@ const BlogDetail = () => {
             };
 
             try {
-                await db.collection("blogs").doc(id).collection("comments")
+                await db.collection("quotes").doc(id).collection("comments")
                     .add(commentData);
                 setSuccess(true);
                 setComment("");
@@ -128,9 +128,9 @@ const BlogDetail = () => {
         if (!currentUser) {
             history.push("/login");
         } else {
-            await db.collection('blogs').doc(id).collection("likes").doc(currentUser.id)
+            await db.collection('quotes').doc(id).collection("likes").doc(currentUser.id)
                 .set({ like: 1 });
-            db.collection("blogs").doc(id).collection("likes").get()
+            db.collection("quotes").doc(id).collection("likes").get()
                 .then((snapshot) => {
                     let likeData = [];
                     snapshot.forEach((doc) => {
@@ -146,9 +146,9 @@ const BlogDetail = () => {
         if (!currentUser) {
             history.push("/login");
         } else {
-            await db.collection('blogs').doc(id).collection("likes").doc(currentUser.id)
+            await db.collection('quotes').doc(id).collection("likes").doc(currentUser.id)
                 .delete();
-            db.collection("blogs").doc(id).collection("likes").get()
+            db.collection("quotes").doc(id).collection("likes").get()
                 .then((snapshot) => {
                     let likeData = [];
                     snapshot.forEach((doc) => {
@@ -162,15 +162,15 @@ const BlogDetail = () => {
     return (
         <div style={{ width: '100vw', height: '100vh' }}>
             <NavBar />
-            {blog && blog ? (
+            {quote && quote ? (
                 <div className="container mt-5">
                     <div className="row">
                         <div className="col-lg-8">
                             <article>
                                 <header className="mb-4">
-                                    <h1 className='fw-bolder mb-1'>{blog.title}</h1>
+                                    <h1 className='fw-bolder mb-1'>{quote.title}</h1>
                                     <div className="text-mutes fst-italic mb-2">
-                                        Posted on {blog.updatedOn} by {blog.authorName}
+                                        Posted on {quote.updatedOn} by {quote.authorName}
                                     </div>
 
                                     <div>
@@ -188,25 +188,16 @@ const BlogDetail = () => {
                                             </button>
                                         </div>
                                     </div>
-                                    {blog.categories && blog.categories.map((data) => (
+                                    {quote.categories && quote.categories.map((data) => (
                                         <p className="badge bg-secondary text-decoration-none link-light fs-6 mt-3" style={{ marginRight: "5px" }}>
                                             {data}
                                         </p>
                                     ))}
                                 </header>
 
-                                <figure className="mb-4">
-                                    <img
-                                        src={blog.images[0]}
-                                        alt="blogImage"
-                                        className="img-fluid rounded"
-                                        style={{ height: '520px', width: '800px' }}
-                                    />
-                                </figure>
-
                                 <section className="mb-5">
                                     <div className="fs-5 mb-4">
-                                        <div dangerouslySetInnerHTML={{ __html: blog.description }} style={{ textAlign: 'justify' }} />
+                                        <div dangerouslySetInnerHTML={{ __html: quote.description }} style={{ textAlign: 'justify' }} />
                                     </div>
                                 </section>
                                 <Comment comments={comments} />
@@ -241,7 +232,7 @@ const BlogDetail = () => {
                                 </figure>
 
                                 <div className='d-flex justify-content-center flex-column align-items-center pb-3'>
-                                    <p>{blog.authorName}</p>
+                                    <p>{quote.authorName}</p>
                                 </div>
 
                                 <div className="py-4">
@@ -260,7 +251,7 @@ const BlogDetail = () => {
                                         <li className="px-1">
                                             <WhatsappShareButton
                                                 url={window.location.href}
-                                                quote={blog.title}
+                                                quote={quote.title}
                                             >
                                                 <WhatsappIcon logoFillColor="white" size={53} round={true} />
                                             </WhatsappShareButton>
@@ -268,7 +259,7 @@ const BlogDetail = () => {
                                         <li className="px-1">
                                             <FacebookShareButton
                                                 url={window.location.href}
-                                                quote={blog.title}
+                                                quote={quote.title}
                                             >
                                                 <FacebookIcon logoFillColor="white" size={53} round={true} />
                                             </FacebookShareButton>
@@ -276,7 +267,7 @@ const BlogDetail = () => {
                                         <li className="px-1">
                                             <TwitterShareButton
                                                 url={window.location.href}
-                                                quote={blog.title}
+                                                quote={quote.title}
                                             >
                                                 <TwitterIcon logoFillColor="white" size={53} round={true} />
                                             </TwitterShareButton>
@@ -284,7 +275,7 @@ const BlogDetail = () => {
                                         <li className="px-1">
                                             <TelegramShareButton
                                                 url={window.location.href}
-                                                quote={blog.title}
+                                                quote={quote.title}
                                             >
                                                 <TelegramIcon logoFillColor="white" size={53} round={true} />
                                             </TelegramShareButton>
@@ -305,20 +296,13 @@ const BlogDetail = () => {
                                         POPULAR POSTS
                                     </p>
 
-                                    {authorBlogs && authorBlogs.map((data) => (
+                                    {authorQuotes && authorQuotes.map((data) => (
 
                                         <div className="ps-3">
                                             <div className="d-flex flex-row">
-                                                <figure className="mb-4">
-                                                    <img className='img-fluid' src={data.images[0]} alt="TestImage" style={{
-                                                        height: "100px",
-                                                        width: "100px",
-                                                        borderRadius: "5%"
-                                                    }} />
-                                                </figure>
                                                 <div className="p-3">
-                                                    <p className='popular-blog-title'>{data.title}</p>
-                                                    <p className='blog-comment'>BY - &nbsp;
+                                                    <div dangerouslySetInnerHTML={{__html: data.description}} className='popular-quote-title' />
+                                                    <p className='quote-comment'>BY - &nbsp;
                                                         <span style={{ fontWeight: 'bold' }}>{data.authorName}</span>
                                                     </p>
                                                 </div>
@@ -345,8 +329,8 @@ const BlogDetail = () => {
                                     <div className="col-12">
                                         <ul className="list-unstyled d-flex flex-wrap justify-content-start flex-row">
                                             <li className="px-2">
-                                                <Link to="/blogs" className="text-decoration-none">
-                                                    <p className='button-author'>Blogs</p>
+                                                <Link to="/quotes" className="text-decoration-none">
+                                                    <p className='button-author'>quotes</p>
                                                 </Link>
                                             </li>
                                             <li className="px-2">
@@ -418,4 +402,4 @@ const BlogDetail = () => {
     )
 }
 
-export default BlogDetail
+export default QuoteDetail
