@@ -3,6 +3,7 @@ import './Card.css'
 import { db } from '../../../firebase'
 import { Trash } from 'react-bootstrap-icons';
 import { useHistory } from 'react-router';
+import { format } from 'timeago.js';
 
 const Card = ({
     image,
@@ -49,7 +50,7 @@ const Card = ({
                     {title}
                 </p>
                 <div className="d-flex justify-content-between m-2">
-                    <p className="small text-dark">{date}</p>
+                    <p className="small text-dark">{format(date)}</p>
                 </div>
                 <div className="card-text content py-1 mt-0 mb-4 pt-0 text-dark"
                     style={{ minHeight: '70px', maxHeight: '70px', fontSize: '17px' }}

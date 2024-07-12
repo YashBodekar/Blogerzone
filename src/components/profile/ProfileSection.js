@@ -251,11 +251,20 @@ const ProfileSection = () => {
 
                     <div className="container d-flex flex-column justify-content-center">
                         {currentUser.isAdmin && (
-                            <button className="btn btn-primary ms-3 mt-2"
-                            onClick={() => history.push("/approval")}
-                            >
-                                Approvals
-                            </button>
+                            <>
+
+                                <button className="btn btn-primary ms-3 mt-2"
+                                    onClick={() => history.push("/approval")}
+                                >
+                                    Approvals
+                                </button>
+                                <button className="btn btn-primary ms-3 mt-2"
+                                    onClick={() => history.push("/feature")}
+                                >
+                                    Feature
+                                </button>
+                            </>
+
                         )}
                     </div>
                 </div>

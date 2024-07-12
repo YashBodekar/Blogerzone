@@ -7,7 +7,8 @@ import { db } from '../../firebase';
 
 const BlogSection = () => {
 
-    const [blogs, setBlogs] = useState([]);
+    let [blogs, setBlogs] = useState([]);
+    let [search, setSearch] = useState("");
 
     useEffect(() => {
         db.collection("blogs").get()
@@ -26,6 +27,18 @@ const BlogSection = () => {
             });
     }, []);
 
+    const handleSearch = (e) => {
+        e.preventDefault();
+        setSearch(e.target.value);
+    }
+
+    if (search.length > 0) {
+        const input = search.toLocaleLowerCase();
+        blogs = blogs.filter((data) => {
+            return data.title.toLocaleLowerCase().match(input);
+        });
+    }
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
@@ -42,6 +55,9 @@ const BlogSection = () => {
                 <NavBar />
                 <div className="container d-flex justify-content-center p-4">
                     <h1 style={{ fontFamily: 'Dancing Script' }} > Blogs</h1>
+                </div>
+                <div className='d-flex justify-content-center'>
+                    <input type="text" className='form-control shadow-none w-50 border-0 h-4' onChange={handleSearch} aria-label='Search' placeholder='Search....' name="" id="" />
                 </div>
 
                 <div className="container d-flex flex-direction-row flex-wrap justify-content-center my-5"
